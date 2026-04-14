@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biolorgia</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f0a0a;
+      color: #ffdddd;
+      text-align: center;
+      padding: 40px;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: #ff4444;
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 15px #990000;
+    }
+
+    .subtitle {
+      color: #aa5555;
+      font-size: 1.4rem;
+      margin-bottom: 40px;
+    }
+
+    .clase {
+      background: rgba(50, 0, 0, 0.6);
+      border: 2px solid #880000;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px auto;
+      max-width: 600px;
+    }
+
+    .nombre-clase {
+      font-size: 1.6rem;
+      color: #ff6666;
+      margin-bottom: 15px;
+    }
+
+    .tiempo {
+      font-size: 3.5rem;
+      font-weight: bold;
+      color: #ffaaaa;
+      letter-spacing: 3px;
+      margin: 15px 0;
+    }
+
+    .hora-info {
+      font-size: 1.3rem;
+      color: #ffdddd;
+      opacity: 0.9;
+    }
+
+    .fin {
+      color: #88ff88;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>⏳ EL INFIERNO EMPIEZA PRONTO</h1>
+  <p class="subtitle">Tiempo restante hasta que empiece la tortura</p>
+
+  <!-- Jueves - Biología -->
+  <div class="clase">
+    <div class="nombre-clase">🩸 Biolorgia - Jueves</div>
+    <div id="jueves" class="tiempo">Cargando...</div>
+    <div class="hora-info">Empieza: Jueves 13:30 → Dura 1 hora</div>
+    <div class="fin">Termina ≈ 14:30</div>
+  </div>
+
+  <!-- Viernes -->
+  <div class="clase">
+    <div class="nombre-clase">🩸 CLASE - Viernes</div>
+    <div id="viernes" class="tiempo">Cargando...</div>
+    <div class="hora-info">Empieza: Viernes 12:30 → Dura 1 hora</div>
+    <div class="fin">Termina ≈ 13:30</div>
+  </div>
+
+  <script>
+    function actualizarContadores() {
+      const ahora = new Date();
+
+      // --- Jueves 13:30 ---
+      let jueves = new Date(ahora);
+      let diasJ = (4 - ahora.getDay() + 7) % 7;
+      jueves.setDate(ahora.getDate() + diasJ);
+      jueves.setHours(13, 30, 0, 0);
+      if (jueves < ahora) jueves.setDate(jueves.getDate() + 7);
+
+      // --- Viernes 12:30 ---
+      let viernes = new Date(ahora);
+      let diasV = (5 - ahora.getDay() + 7) % 7;
+      viernes.setDate(ahora.getDate() + diasV);
+      viernes.setHours(12, 30, 0, 0);
+      if (viernes < ahora) viernes.setDate(viernes.getDate() + 7);
+
+      function formato(ms) {
+        const d = Math.floor(ms / (1000*60*60*24));
+        const h = Math.floor((ms % (1000*60*60*24)) / (1000*60*60));
+        const m = Math.floor((ms % (1000*60*60)) / (1000*60));
+        const s = Math.floor((ms % (1000*60)) / 1000);
+        return `${d}d ${h.toString().padStart(2,'0')}h ${m.toString().padStart(2,'0')}m ${s.toString().padStart(2,'0')}s`;
+      }
+
+      document.getElementById("jueves").textContent = formato(jueves - ahora);
+      document.getElementById("viernes").textContent = formato(viernes - ahora);
+    }
+
+    // Actualizar cada segundo
+    setInterval(actualizarContadores, 1000);
+    actualizarContadores();
+  </script>
+
+</body>
+</html>
