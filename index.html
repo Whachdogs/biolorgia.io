@@ -95,6 +95,14 @@
 <body>
   <h1>⏳ EL INFIERNO EMPIEZA PRONTO</h1>
   <p class="subtitle">Tiempo restante hasta que empiece la tortura</p>
+  <div id="gif-emergencia" style="display: none; margin: 25px auto; max-width: 700px;">
+    <img src="PEGA_AQUÍ_TU_URL_DEL_GIF" 
+         alt="Killer Queen" 
+         style="width: 100%; 
+                border: 5px solid #ff0000; 
+                border-radius: 12px; 
+                box-shadow: 0 0 40px #ff0000;">
+  </div>
 
   <!-- Jueves - Biología -->
   <div class="clase" id="clase-jueves">
@@ -124,7 +132,8 @@
       enEmergencia = true;
       document.body.classList.add("emergencia");
       alarma.play().catch(() => {}); // algunos navegadores bloquean autoplay
-      alert("¡LA CLASE EMPIEZA AHORA! ¡CORRE!");
+      alert("We shall die");
+      document.getElementById("gif-emergencia").style.display = "block";
     }
 
     function salirModoEmergencia() {
@@ -133,6 +142,7 @@
       document.body.classList.remove("emergencia");
       alarma.pause();
       alarma.currentTime = 0;
+     document.getElementById("gif-emergencia").style.display = "none"; 
     }
 
     function actualizarContadores() {
