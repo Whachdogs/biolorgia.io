@@ -33,7 +33,6 @@
       padding: 25px;
       margin: 20px auto;
       max-width: 600px;
-      transition: all 0.4s;
     }
     .nombre-clase {
       font-size: 1.6rem;
@@ -57,54 +56,30 @@
       font-size: 1.1rem;
     }
 
-    /* === MODO EMERGENCIA === */
-    body.emergencia {
-      background: #440000;
-      animation: flash 0.8s infinite alternate;
-    }
-    body.emergencia .clase {
-      background: rgba(100, 0, 0, 0.9);
-      border-color: #ff0000;
-      box-shadow: 0 0 30px #ff0000;
-    }
-    body.emergencia h1,
-    body.emergencia .tiempo {
-      color: #ff0000;
-      text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
-      animation: shake 0.4s infinite;
-    }
-    @keyframes flash {
-      from { background: #660000; }
-      to { background: #330000; }
-    }
-    @keyframes shake {
-      0% { transform: translate(1px, 1px) rotate(0deg); }
-      10% { transform: translate(-1px, -2px) rotate(-1deg); }
-      20% { transform: translate(-3px, 0px) rotate(1deg); }
-      30% { transform: translate(3px, 2px) rotate(0deg); }
-      40% { transform: translate(1px, -1px) rotate(1deg); }
-      50% { transform: translate(-1px, 2px) rotate(-1deg); }
-      60% { transform: translate(-3px, 1px) rotate(0deg); }
-      70% { transform: translate(3px, 2px) rotate(-1deg); }
-      80% { transform: translate(-1px, -1px) rotate(1deg); }
-      90% { transform: translate(1px, 2px) rotate(0deg); }
-      100% { transform: translate(1px, -2px) rotate(-1deg); }
+    #mensaje-muerte {
+      display: none;
+      font-size: 5rem;
+      color: red;
+      margin-top: 20px;
+      text-shadow: 0 0 30px red;
     }
   </style>
 </head>
+
 <body>
   <h1>⏳ EL INFIERNO EMPIEZA PRONTO</h1>
   <p class="subtitle">Tiempo restante hasta que empiece la tortura</p>
+
+  <!-- GIF LARGO (este debería quedarse mucho más tiempo) -->
   <div id="gif-emergencia" style="display: none; margin: 25px auto; max-width: 700px;">
-    <img src="PEGA_AQUÍ_TU_URL_DEL_GIF" 
-         alt="Killer Queen" 
-         style="width: 100%; 
-                border: 5px solid #ff0000; 
-                border-radius: 12px; 
-                box-shadow: 0 0 40px #ff0000;">
+    <img src="https://media1.tenor.com/m/jlBrMSy8B8IAAAAC/elmo-hell.gif" 
+         style="width: 100%; border: 5px solid #ff0000; border-radius: 12px;">
   </div>
 
-  <!-- Jueves - Biología -->
+  <!-- TEXTO -->
+  <div id="mensaje-muerte">WE SHALL DIE</div>
+
+  <!-- Jueves -->
   <div class="clase" id="clase-jueves">
     <div class="nombre-clase">🩸 Biologia - Jueves</div>
     <div id="jueves" class="tiempo">Cargando...</div>
@@ -121,41 +96,39 @@
   </div>
 
   <script>
-    // Sonido de alarma (puedes cambiar la URL por otro sonido si quieres)
-    const alarma = new Audio("https://files.catbox.moe/oeh45g.mp3");
-    alarma.loop = true;
-
     let enEmergencia = false;
+    let tiempoInicioEmergencia = 0;
 
     function entrarModoEmergencia() {
       if (enEmergencia) return;
       enEmergencia = true;
-      document.body.classList.add("emergencia");
-      alarma.play().catch(() => {}); // algunos navegadores bloquean autoplay
-      alert("We shall die");
+      tiempoInicioEmergencia = Date.now();
+
+      document.querySelectorAll('h1, .subtitle, .clase').forEach(el => el.style.display = 'none');
+
       document.getElementById("gif-emergencia").style.display = "block";
+      document.getElementById("mensaje-muerte").style.display = "block";
     }
 
     function salirModoEmergencia() {
       if (!enEmergencia) return;
       enEmergencia = false;
-      document.body.classList.remove("emergencia");
-      alarma.pause();
-      alarma.currentTime = 0;
-     document.getElementById("gif-emergencia").style.display = "none"; 
+
+      document.querySelectorAll('h1, .subtitle, .clase').forEach(el => el.style.display = '');
+
+      document.getElementById("gif-emergencia").style.display = "none";
+      document.getElementById("mensaje-muerte").style.display = "none";
     }
 
     function actualizarContadores() {
       const ahora = new Date();
 
-      // --- Jueves 13:30 ---
       let jueves = new Date(ahora);
       let diasJ = (4 - ahora.getDay() + 7) % 7;
       jueves.setDate(ahora.getDate() + diasJ);
       jueves.setHours(13, 30, 0, 0);
       if (jueves < ahora) jueves.setDate(jueves.getDate() + 7);
 
-      // --- Viernes 12:35 (corregido según tu hora-info) ---
       let viernes = new Date(ahora);
       let diasV = (5 - ahora.getDay() + 7) % 7;
       viernes.setDate(ahora.getDate() + diasV);
@@ -170,29 +143,25 @@
         return `${d}d ${h.toString().padStart(2,'0')}h ${m.toString().padStart(2,'0')}m ${s.toString().padStart(2,'0')}s`;
       }
 
-      const tiempoJueves = jueves - ahora;
-      const tiempoViernes = viernes - ahora;
+      document.getElementById("jueves").textContent = formato(jueves - ahora);
+      document.getElementById("viernes").textContent = formato(viernes - ahora);
 
-      document.getElementById("jueves").textContent = formato(tiempoJueves);
-      document.getElementById("viernes").textContent = formato(tiempoViernes);
+      const tiempoPasado = Date.now() - tiempoInicioEmergencia;
 
-      // Detectar si ya empezó alguna clase
-      if (tiempoJueves <= 0 && tiempoJueves > -60000) { // durante el primer minuto
+      if (enEmergencia) {
+        if (tiempoPasado >= 3600000) salirModoEmergencia();
+      } else if ((jueves - ahora <= 0 && jueves - ahora > -60000) || 
+                 (viernes - ahora <= 0 && viernes - ahora > -60000)) {
         entrarModoEmergencia();
-        document.getElementById("clase-jueves").style.borderColor = "#ff0000";
-      } 
-      else if (tiempoViernes <= 0 && tiempoViernes > -60000) {
-        entrarModoEmergencia();
-        document.getElementById("clase-viernes").style.borderColor = "#ff0000";
-      } 
-      else {
-        salirModoEmergencia();
       }
     }
 
-    // Actualizar cada segundo
     setInterval(actualizarContadores, 1000);
     actualizarContadores();
+
+    // Para probar ahora mismo → quita las dos // de la línea de abajo
+    //entrarModoEmergencia();
+
   </script>
 </body>
 </html>
