@@ -13,21 +13,19 @@
       padding: 40px;
       margin: 0;
       min-height: 100vh;
+      transition: all 0.4s;
     }
-
     h1 {
       color: #ff4444;
       font-size: 2.8rem;
       margin-bottom: 10px;
       text-shadow: 0 0 15px #990000;
     }
-
     .subtitle {
       color: #aa5555;
       font-size: 1.4rem;
       margin-bottom: 40px;
     }
-
     .clase {
       background: rgba(50, 0, 0, 0.6);
       border: 2px solid #880000;
@@ -35,14 +33,13 @@
       padding: 25px;
       margin: 20px auto;
       max-width: 600px;
+      transition: all 0.4s;
     }
-
     .nombre-clase {
       font-size: 1.6rem;
       color: #ff6666;
       margin-bottom: 15px;
     }
-
     .tiempo {
       font-size: 3.5rem;
       font-weight: bold;
@@ -50,26 +47,57 @@
       letter-spacing: 3px;
       margin: 15px 0;
     }
-
     .hora-info {
       font-size: 1.3rem;
       color: #ffdddd;
       opacity: 0.9;
     }
-
     .fin {
       color: #88ff88;
       font-size: 1.1rem;
     }
+
+    /* === MODO EMERGENCIA === */
+    body.emergencia {
+      background: #440000;
+      animation: flash 0.8s infinite alternate;
+    }
+    body.emergencia .clase {
+      background: rgba(100, 0, 0, 0.9);
+      border-color: #ff0000;
+      box-shadow: 0 0 30px #ff0000;
+    }
+    body.emergencia h1,
+    body.emergencia .tiempo {
+      color: #ff0000;
+      text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+      animation: shake 0.4s infinite;
+    }
+    @keyframes flash {
+      from { background: #660000; }
+      to { background: #330000; }
+    }
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      10% { transform: translate(-1px, -2px) rotate(-1deg); }
+      20% { transform: translate(-3px, 0px) rotate(1deg); }
+      30% { transform: translate(3px, 2px) rotate(0deg); }
+      40% { transform: translate(1px, -1px) rotate(1deg); }
+      50% { transform: translate(-1px, 2px) rotate(-1deg); }
+      60% { transform: translate(-3px, 1px) rotate(0deg); }
+      70% { transform: translate(3px, 2px) rotate(-1deg); }
+      80% { transform: translate(-1px, -1px) rotate(1deg); }
+      90% { transform: translate(1px, 2px) rotate(0deg); }
+      100% { transform: translate(1px, -2px) rotate(-1deg); }
+    }
   </style>
 </head>
 <body>
-
   <h1>⏳ EL INFIERNO EMPIEZA PRONTO</h1>
   <p class="subtitle">Tiempo restante hasta que empiece la tortura</p>
 
   <!-- Jueves - Biología -->
-  <div class="clase">
+  <div class="clase" id="clase-jueves">
     <div class="nombre-clase">🩸 Biologia - Jueves</div>
     <div id="jueves" class="tiempo">Cargando...</div>
     <div class="hora-info">Empieza: Jueves 13:30 → Dura 1 hora</div>
@@ -77,7 +105,7 @@
   </div>
 
   <!-- Viernes -->
-  <div class="clase">
+  <div class="clase" id="clase-viernes">
     <div class="nombre-clase">🩸 CLASE - Viernes</div>
     <div id="viernes" class="tiempo">Cargando...</div>
     <div class="hora-info">Empieza: Viernes 12:35 → Dura 1 hora</div>
@@ -85,6 +113,28 @@
   </div>
 
   <script>
+    // Sonido de alarma (puedes cambiar la URL por otro sonido si quieres)
+    const alarma = new Audio("https://files.catbox.moe/oeh45g.mp3");
+    alarma.loop = true;
+
+    let enEmergencia = false;
+
+    function entrarModoEmergencia() {
+      if (enEmergencia) return;
+      enEmergencia = true;
+      document.body.classList.add("emergencia");
+      alarma.play().catch(() => {}); // algunos navegadores bloquean autoplay
+      alert("¡LA CLASE EMPIEZA AHORA! ¡CORRE!");
+    }
+
+    function salirModoEmergencia() {
+      if (!enEmergencia) return;
+      enEmergencia = false;
+      document.body.classList.remove("emergencia");
+      alarma.pause();
+      alarma.currentTime = 0;
+    }
+
     function actualizarContadores() {
       const ahora = new Date();
 
@@ -95,11 +145,11 @@
       jueves.setHours(13, 30, 0, 0);
       if (jueves < ahora) jueves.setDate(jueves.getDate() + 7);
 
-      // --- Viernes 12:30 ---
+      // --- Viernes 12:35 (corregido según tu hora-info) ---
       let viernes = new Date(ahora);
       let diasV = (5 - ahora.getDay() + 7) % 7;
       viernes.setDate(ahora.getDate() + diasV);
-      viernes.setHours(12, 30, 0, 0);
+      viernes.setHours(12, 35, 0, 0);
       if (viernes < ahora) viernes.setDate(viernes.getDate() + 7);
 
       function formato(ms) {
@@ -110,14 +160,29 @@
         return `${d}d ${h.toString().padStart(2,'0')}h ${m.toString().padStart(2,'0')}m ${s.toString().padStart(2,'0')}s`;
       }
 
-      document.getElementById("jueves").textContent = formato(jueves - ahora);
-      document.getElementById("viernes").textContent = formato(viernes - ahora);
+      const tiempoJueves = jueves - ahora;
+      const tiempoViernes = viernes - ahora;
+
+      document.getElementById("jueves").textContent = formato(tiempoJueves);
+      document.getElementById("viernes").textContent = formato(tiempoViernes);
+
+      // Detectar si ya empezó alguna clase
+      if (tiempoJueves <= 0 && tiempoJueves > -60000) { // durante el primer minuto
+        entrarModoEmergencia();
+        document.getElementById("clase-jueves").style.borderColor = "#ff0000";
+      } 
+      else if (tiempoViernes <= 0 && tiempoViernes > -60000) {
+        entrarModoEmergencia();
+        document.getElementById("clase-viernes").style.borderColor = "#ff0000";
+      } 
+      else {
+        salirModoEmergencia();
+      }
     }
 
     // Actualizar cada segundo
     setInterval(actualizarContadores, 1000);
     actualizarContadores();
   </script>
-
 </body>
 </html>
